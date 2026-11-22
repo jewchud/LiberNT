@@ -7,3 +7,14 @@ function(remove_target_compile_option _module _option)
     list(REMOVE_ITEM _options ${_option})
     set_target_properties(${_module} PROPERTIES COMPILE_OPTIONS "${_options}")
 endfunction()
+
+# Raise compute-heavy targets past the Release -O2 default. MSVC Release
+# already uses /Ox. Target options follow directory -O2, so -O3 wins.
+function(reactos_optimize_for_speed)
+    if(NOT CMAKE_BUILD_TYPE STREQUAL "Release" OR MSVC)
+        return()
+    endif()
+    foreach(_module ${ARGN})
+        target_compile_options(${_module} PRIVATE -O3)
+    endforeach()
+endfunction()

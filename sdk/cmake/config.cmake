@@ -64,7 +64,12 @@ set(OPTIMIZE "0" CACHE STRING
  6 = Optimize yet more (-O3)
  7 = Disregard strict standards compliance (-Ofast)")
 
-set(LTCG FALSE CACHE BOOL
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(_REACTOS_DEFAULT_LTCG TRUE)
+else()
+    set(_REACTOS_DEFAULT_LTCG FALSE)
+endif()
+set(LTCG ${_REACTOS_DEFAULT_LTCG} CACHE BOOL
 "Whether to build with link-time code generation")
 
 set(KD_DEBUGGER "AUTO" CACHE STRING

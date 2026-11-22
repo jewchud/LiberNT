@@ -63,6 +63,7 @@ list(APPEND SOURCE
 
 add_library(libjpeg MODULE ${SOURCE} ${CMAKE_CURRENT_BINARY_DIR}/libjpeg.def)
 set_module_type(libjpeg win32dll)
+reactos_optimize_for_speed(libjpeg)
 add_importlibs(libjpeg msvcrt kernel32)
 add_pch(libjpeg precomp.h SOURCE)
 add_cd_file(TARGET libjpeg DESTINATION reactos/system32 FOR all)

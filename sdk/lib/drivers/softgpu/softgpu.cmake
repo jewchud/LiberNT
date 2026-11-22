@@ -25,6 +25,7 @@ function(add_softgpu_engine _target)
         ${_engine_DEFINITIONS}
         REACTOS_WDDM_TARGET_LEVEL=${REACTOS_WDDM_TARGET_LEVEL}
         REACTOS_WDDM_TARGET_INTERFACE_VERSION=${REACTOS_WDDM_TARGET_INTERFACE_VERSION})
+    reactos_optimize_for_speed(${_target})
     add_pch(${_target} ${SOFTGPU_ENGINE_DIR}/softgpu.h "${_source}")
     add_dependencies(${_target} bugcodes xdk)
 endfunction()

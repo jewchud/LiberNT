@@ -67,6 +67,12 @@ reactos_sdk_flags(_ffmpeg_sdk
     CXX_RUNTIME "${REACTOS_LIBCXX_ROOT}"
     CRT full)
 
+# FFmpeg's own configure defaults to -O3; keep that explicit for Release ISOs.
+set(_ffmpeg_opt_flags)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(_ffmpeg_opt_flags -O3)
+endif()
+
 set(_ffmpeg_asm_args)
 if(ARCH STREQUAL "amd64" OR ARCH STREQUAL "i386")
     find_program(FFMPEG_NASM NAMES nasm NO_CACHE)
@@ -109,8 +115,8 @@ ExternalProject_Add(ffmpeg
         --cc=${_ffmpeg_llvm}/clang
         --cxx=${_ffmpeg_llvm}/clang++
         "--windres=${_ffmpeg_llvm}/llvm-windres --target=${_ffmpeg_triple} ${_ffmpeg_sdk_RC_FLAGS}"
-        "--extra-cflags=--target=${_ffmpeg_triple} ${_ffmpeg_sdk_C_FLAGS}"
-        "--extra-cxxflags=--target=${_ffmpeg_triple} ${_ffmpeg_sdk_CXX_FLAGS}"
+        "--extra-cflags=--target=${_ffmpeg_triple} ${_ffmpeg_opt_flags} ${_ffmpeg_sdk_C_FLAGS}"
+        "--extra-cxxflags=--target=${_ffmpeg_triple} ${_ffmpeg_opt_flags} ${_ffmpeg_sdk_CXX_FLAGS}"
         "--extra-ldflags=--target=${_ffmpeg_triple} ${_ffmpeg_sdk_LINK_FLAGS}"
         --extra-ldexeflags=-Wl,-entry,mainCRTStartup
         --extra-ldsoflags=-Wl,-entry,DllMainCRTStartup

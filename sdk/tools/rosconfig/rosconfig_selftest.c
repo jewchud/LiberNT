@@ -196,7 +196,7 @@ int rosconfig_self_test(void)
         "config LTCG\n"
         "    prompt \"Link-time code generation\"\n"
         "    type bool\n"
-        "    default n\n"
+        "    default y\n"
         "endmenu\n"
         "\n"
         "menu \"Toolchain support\"\n"

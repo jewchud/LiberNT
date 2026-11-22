@@ -44,7 +44,8 @@ WINE_DEFAULT_DEBUG_CHANNEL(wow);
 #if defined(_MSC_VER) || (defined(__REACTOS__) && defined(WOW64_ASM_FILE))
 #define WOW64_ASM_CALLEE
 #else
-#define WOW64_ASM_CALLEE static __attribute__((used))
+/* Not static: inline asm calls these by name; Thin LTO renames/hides statics. */
+#define WOW64_ASM_CALLEE __attribute__((used))
 #endif
 
 USHORT native_machine = 0;
