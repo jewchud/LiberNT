@@ -630,6 +630,84 @@ static MMRESULT MMIO_SetBuffer(WINE_MMIO* wm, void* pchBuffer, LONG cchBuffer,
     return MMSYSERR_NOERROR;
 }
 
+#define MMIO_MAXFILE 128
+
+static void MMIO_SetOpenError(MMIOINFO *info, WORD error)
+{
+    if (info)
+	info->wErrorRet = error;
+}
+
+static HMMIO MMIO_ParseExistA(LPSTR szFileName, MMIOINFO *info, DWORD dwOpenFlags)
+{
+    char buffer[MAX_PATH];
+    DWORD len;
+
+    if (!szFileName)
+    {
+	MMIO_SetOpenError(info, MMIOERR_OUTOFMEMORY);
+	return (HMMIO)FALSE;
+    }
+
+    len = GetFullPathNameA(szFileName, ARRAY_SIZE(buffer), buffer, NULL);
+    if (!len || len >= ARRAY_SIZE(buffer) || len >= MMIO_MAXFILE)
+    {
+	MMIO_SetOpenError(info, MMIOERR_OUTOFMEMORY);
+	return (HMMIO)FALSE;
+    }
+
+    if ((dwOpenFlags & MMIO_EXIST) &&
+	GetFileAttributesA(buffer) == INVALID_FILE_ATTRIBUTES)
+    {
+	strcpy(szFileName, buffer);
+	MMIO_SetOpenError(info, MMIOERR_FILENOTFOUND);
+	return (HMMIO)FALSE;
+    }
+
+    strcpy(szFileName, buffer);
+    MMIO_SetOpenError(info, MMSYSERR_NOERROR);
+    return (HMMIO)TRUE;
+}
+
+static HMMIO MMIO_ParseExistW(LPWSTR szFileName, MMIOINFO *info, DWORD dwOpenFlags)
+{
+    WCHAR buffer[MAX_PATH];
+    DWORD len;
+
+    if (!szFileName)
+    {
+	MMIO_SetOpenError(info, MMIOERR_OUTOFMEMORY);
+	return (HMMIO)FALSE;
+    }
+
+    len = GetFullPathNameW(szFileName, ARRAY_SIZE(buffer), buffer, NULL);
+    if (!len || len >= ARRAY_SIZE(buffer))
+    {
+	MMIO_SetOpenError(info, MMIOERR_OUTOFMEMORY);
+	return (HMMIO)FALSE;
+    }
+
+    if (len >= MMIO_MAXFILE)
+    {
+	memcpy(szFileName, buffer, (MMIO_MAXFILE - 1) * sizeof(WCHAR));
+	szFileName[MMIO_MAXFILE - 1] = 0;
+	MMIO_SetOpenError(info, MMIOERR_OUTOFMEMORY);
+	return (HMMIO)FALSE;
+    }
+
+    if ((dwOpenFlags & MMIO_EXIST) &&
+	GetFileAttributesW(buffer) == INVALID_FILE_ATTRIBUTES)
+    {
+	lstrcpyW(szFileName, buffer);
+	MMIO_SetOpenError(info, MMIOERR_FILENOTFOUND);
+	return (HMMIO)FALSE;
+    }
+
+    lstrcpyW(szFileName, buffer);
+    MMIO_SetOpenError(info, MMSYSERR_NOERROR);
+    return (HMMIO)TRUE;
+}
+
 /**************************************************************************
  * 			MMIO_Open       			[internal]
  */
@@ -647,18 +725,8 @@ static HMMIO MMIO_Open(LPSTR szFileName, MMIOINFO* refmminfo, DWORD dwOpenFlags,
         is_unicode = FALSE;
     }
 
-    if (dwOpenFlags & (MMIO_PARSE|MMIO_EXIST)) {
-	char	buffer[MAX_PATH];
-
-	if (!szFileName)
-	    return (HMMIO)FALSE;
-	if (GetFullPathNameA(szFileName, sizeof(buffer), buffer, NULL) >= sizeof(buffer))
-	    return (HMMIO)FALSE;
-	if ((dwOpenFlags & MMIO_EXIST) && (GetFileAttributesA(buffer) == INVALID_FILE_ATTRIBUTES))
-	    return (HMMIO)FALSE;
-	strcpy(szFileName, buffer);
-	return (HMMIO)TRUE;
-    }
+    if (dwOpenFlags & (MMIO_PARSE|MMIO_EXIST))
+	return MMIO_ParseExistA(szFileName, refmminfo, dwOpenFlags);
 
     if ((wm = MMIO_Create()) == NULL)
 	return 0;
@@ -744,6 +812,9 @@ HMMIO WINAPI mmioOpenW(LPWSTR szFileName, MMIOINFO* lpmmioinfo,
     HMMIO 	ret;
     LPSTR	szFn = NULL;
 
+    if (dwOpenFlags & (MMIO_PARSE|MMIO_EXIST))
+	return MMIO_ParseExistW(szFileName, lpmmioinfo, dwOpenFlags);
+
     if (szFileName)
     {
         INT     len = WideCharToMultiByte( CP_ACP, 0, szFileName, -1, NULL, 0, NULL, NULL );
@@ -765,6 +836,9 @@ HMMIO WINAPI mmioOpenW(LPWSTR szFileName, MMIOINFO* lpmmioinfo,
 HMMIO WINAPI mmioOpenA(LPSTR szFileName, MMIOINFO* lpmmioinfo,
 		       DWORD dwOpenFlags)
 {
+    if (dwOpenFlags & (MMIO_PARSE|MMIO_EXIST))
+	return MMIO_ParseExistA(szFileName, lpmmioinfo, dwOpenFlags);
+
     return  MMIO_Open(szFileName, lpmmioinfo, dwOpenFlags, FALSE);
 }
 
