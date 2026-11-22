@@ -35,6 +35,11 @@ elseif(MSVC)
 endif()
 
 add_dependencies(faudio psdk)
+reactos_optimize_for_speed(faudio)
+# i686 OARCH has no SSE2; enable it so FAudio_internal_simd.c builds the SSE2 paths.
+if(ARCH STREQUAL "i386" AND NOT MSVC)
+    target_compile_options(faudio PRIVATE -msse2)
+endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
     target_compile_options(faudio PRIVATE -Wno-unused-but-set-variable -Wno-unused-function -Wno-unused-variable)

@@ -79,3 +79,4 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         -Wno-array-parameter
     )
 endif()
+reactos_optimize_for_speed(libtiff)

@@ -8,4 +8,5 @@ list(APPEND SOURCE
 
 add_library(libsamplerate ${SOURCE})
 add_dependencies(libsamplerate psdk)
+reactos_optimize_for_speed(libsamplerate)
 add_pch(libsamplerate precomp.h SOURCE)

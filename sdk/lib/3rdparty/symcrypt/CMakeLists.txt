@@ -259,4 +259,5 @@ elseif(MSVC)
     target_compile_options(symcrypt PRIVATE /wd4068)
     target_compile_options(symcrypt_km PRIVATE /wd4068)
 endif()
-reactos_optimize_for_speed(symcrypt symcrypt_km)
+# Stay on Release -O2: SymCrypt's C paths are side-channel sensitive and are
+# not validated here for -O3 codegen; AES/SHA hot paths are mostly asm anyway.

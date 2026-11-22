@@ -26,3 +26,4 @@ target_include_directories(lcms2
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(lcms2 BEFORE PRIVATE ${REACTOS_SOURCE_DIR}/sdk/include/ucrt)
 add_dependencies(lcms2 psdk)
+reactos_optimize_for_speed(lcms2)

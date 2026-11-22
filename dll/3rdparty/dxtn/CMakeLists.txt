@@ -7,5 +7,6 @@ add_library(dxtn MODULE
     ${CMAKE_CURRENT_BINARY_DIR}/dxtn.def)
 
 set_module_type(dxtn win32dll ENTRYPOINT 0)
+reactos_optimize_for_speed(dxtn)
 add_importlibs(dxtn msvcrt kernel32)
 add_cd_file(TARGET dxtn DESTINATION reactos/system32 FOR all)

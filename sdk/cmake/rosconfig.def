@@ -164,8 +164,8 @@ config LTCG
     default y
     depends BUILD_TYPE=Release
     help
-      Build GCC or Clang Release images with link-time code generation.
-      On by default for Release; Thin LTO on Clang, full LTO on GCC.
+      Build GCC or Clang Release images with full link-time code generation.
+      On by default for Release.
 
 config STACK_PROTECTOR
     prompt "Stack protector"
